@@ -10,82 +10,38 @@
 const artworks = [
     {
         id: 1,
-        image: 'https://picsum.photos/seed/art-spring/600/800',
-        title: '春日樱花',
-        author: '小明',
-        comments: [
-            { name: '小红', text: '好美的樱花！像真的在眼前一样', time: '2024-03-15 14:20' },
-            { name: '小华', text: '色彩搭配得太好了', time: '2024-03-16 09:10' }
-        ]
+        image: 'images/art-1.png',
+        title: '实验',
+        author: '漂流本',
+        comments: []
     },
     {
         id: 2,
-        image: 'https://picsum.photos/seed/art-cat/600/500',
-        title: '窗边的猫',
-        author: '小芳',
-        comments: [
-            { name: '小明', text: '这只猫好可爱！', time: '2024-03-17 16:30' }
-        ]
+        image: 'images/art-2.jpeg',
+        title: '实验',
+        author: '漂流本',
+        comments: []
     },
     {
         id: 3,
-        image: 'https://picsum.photos/seed/art-mountain/600/750',
-        title: '远山如黛',
-        author: '小刚',
+        image: 'images/art-3.jpeg',
+        title: '实验',
+        author: '漂流本',
         comments: []
     },
     {
         id: 4,
-        image: 'https://picsum.photos/seed/art-flower/600/600',
-        title: '向日葵田',
-        author: '小丽',
-        comments: [
-            { name: '小芳', text: '阳光的感觉扑面而来', time: '2024-03-18 11:00' },
-            { name: '小刚', text: '好想站在向日葵田中间', time: '2024-03-18 13:45' },
-            { name: '小红', text: '每次看到都很开心！', time: '2024-03-19 08:20' }
-        ]
+        image: 'images/art-4.jpeg',
+        title: '实验',
+        author: '漂流本',
+        comments: []
     },
     {
         id: 5,
-        image: 'https://picsum.photos/seed/art-night/600/900',
-        title: '星空下的房子',
-        author: '小华',
-        comments: [
-            { name: '小丽', text: '好温馨的画面', time: '2024-03-20 20:15' }
-        ]
-    },
-    {
-        id: 6,
-        image: 'https://picsum.photos/seed/art-ocean/600/450',
-        title: '海浪与礁石',
-        author: '小明',
+        image: 'images/art-5.png',
+        title: '实验',
+        author: '漂流本',
         comments: []
-    },
-    {
-        id: 7,
-        image: 'https://picsum.photos/seed/art-book/600/700',
-        title: '午后阅读',
-        author: '小红',
-        comments: [
-            { name: '小华', text: '安静的午后时光', time: '2024-03-21 15:00' }
-        ]
-    },
-    {
-        id: 8,
-        image: 'https://picsum.photos/seed/art-rain/600/550',
-        title: '雨中的街道',
-        author: '小刚',
-        comments: []
-    },
-    {
-        id: 9,
-        image: 'https://picsum.photos/seed/art-forest/600/850',
-        title: '迷雾森林',
-        author: '小芳',
-        comments: [
-            { name: '小明', text: '神秘又梦幻', time: '2024-03-22 10:30' },
-            { name: '小丽', text: '像童话故事里的场景', time: '2024-03-22 14:00' }
-        ]
     }
 ];
 
