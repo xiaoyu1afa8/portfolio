@@ -1,404 +1,353 @@
 // ========================================
-// 个人作品集网站 - JavaScript 交互
+// 漂流本画展 - JavaScript
 // ========================================
 
-document.addEventListener('DOMContentLoaded', function() {
-    // 初始化所有功能
-    initNavigation();
-    initSkillBars();
-    initScrollAnimations();
-    initContactForm();
-    initSmoothScroll();
+// ---------- 示例画作数据 ----------
+// 你可以替换成自己的画作信息
+// image: 图片地址（可以是相对路径如 images/01.jpg，也可以是网络链接）
+// title: 画作标题
+// author: 作者名字
+const artworks = [
+    {
+        id: 1,
+        image: 'https://picsum.photos/seed/art-spring/600/800',
+        title: '春日樱花',
+        author: '小明',
+        comments: [
+            { name: '小红', text: '好美的樱花！像真的在眼前一样', time: '2024-03-15 14:20' },
+            { name: '小华', text: '色彩搭配得太好了', time: '2024-03-16 09:10' }
+        ]
+    },
+    {
+        id: 2,
+        image: 'https://picsum.photos/seed/art-cat/600/500',
+        title: '窗边的猫',
+        author: '小芳',
+        comments: [
+            { name: '小明', text: '这只猫好可爱！', time: '2024-03-17 16:30' }
+        ]
+    },
+    {
+        id: 3,
+        image: 'https://picsum.photos/seed/art-mountain/600/750',
+        title: '远山如黛',
+        author: '小刚',
+        comments: []
+    },
+    {
+        id: 4,
+        image: 'https://picsum.photos/seed/art-flower/600/600',
+        title: '向日葵田',
+        author: '小丽',
+        comments: [
+            { name: '小芳', text: '阳光的感觉扑面而来', time: '2024-03-18 11:00' },
+            { name: '小刚', text: '好想站在向日葵田中间', time: '2024-03-18 13:45' },
+            { name: '小红', text: '每次看到都很开心！', time: '2024-03-19 08:20' }
+        ]
+    },
+    {
+        id: 5,
+        image: 'https://picsum.photos/seed/art-night/600/900',
+        title: '星空下的房子',
+        author: '小华',
+        comments: [
+            { name: '小丽', text: '好温馨的画面', time: '2024-03-20 20:15' }
+        ]
+    },
+    {
+        id: 6,
+        image: 'https://picsum.photos/seed/art-ocean/600/450',
+        title: '海浪与礁石',
+        author: '小明',
+        comments: []
+    },
+    {
+        id: 7,
+        image: 'https://picsum.photos/seed/art-book/600/700',
+        title: '午后阅读',
+        author: '小红',
+        comments: [
+            { name: '小华', text: '安静的午后时光', time: '2024-03-21 15:00' }
+        ]
+    },
+    {
+        id: 8,
+        image: 'https://picsum.photos/seed/art-rain/600/550',
+        title: '雨中的街道',
+        author: '小刚',
+        comments: []
+    },
+    {
+        id: 9,
+        image: 'https://picsum.photos/seed/art-forest/600/850',
+        title: '迷雾森林',
+        author: '小芳',
+        comments: [
+            { name: '小明', text: '神秘又梦幻', time: '2024-03-22 10:30' },
+            { name: '小丽', text: '像童话故事里的场景', time: '2024-03-22 14:00' }
+        ]
+    }
+];
+
+// ---------- 初始化 ----------
+document.addEventListener('DOMContentLoaded', () => {
+    loadComments();
+    renderGallery();
+    initNavbar();
+    initLightbox();
+    initBackTop();
+    updateStats();
 });
 
-// ========================================
-// 导航栏功能
-// ========================================
-function initNavigation() {
-    const navbar = document.querySelector('.navbar');
-    const hamburger = document.querySelector('.hamburger');
-    const navLinks = document.querySelector('.nav-links');
-    const navItems = document.querySelectorAll('.nav-links a');
+// ---------- 评论存储（localStorage）----------
+function loadComments() {
+    const saved = localStorage.getItem('artwork_comments');
+    if (saved) {
+        const parsed = JSON.parse(saved);
+        artworks.forEach(art => {
+            if (parsed[art.id]) {
+                art.comments = parsed[art.id];
+            }
+        });
+    }
+}
 
-    // 滚动时改变导航栏样式
+function saveComments() {
+    const data = {};
+    artworks.forEach(art => {
+        data[art.id] = art.comments;
+    });
+    localStorage.setItem('artwork_comments', JSON.stringify(data));
+}
+
+// ---------- 渲染画廊 ----------
+function renderGallery() {
+    const masonry = document.getElementById('masonry');
+    masonry.innerHTML = '';
+
+    artworks.forEach(art => {
+        const card = document.createElement('div');
+        card.className = 'art-card';
+        card.setAttribute('data-id', art.id);
+
+        // 最新一条评论预览
+        let previewHTML = '';
+        if (art.comments.length > 0) {
+            const latest = art.comments[art.comments.length - 1];
+            previewHTML = `
+                <div class="art-preview-comments">
+                    <p class="art-preview-comment"><strong>${escapeHTML(latest.name)}</strong>：${escapeHTML(latest.text)}</p>
+                </div>
+            `;
+        }
+
+        card.innerHTML = `
+            <div class="art-image-wrap">
+                <img class="art-image" src="${art.image}" alt="${escapeHTML(art.title)}" loading="lazy">
+                <span class="art-comment-badge">💬 ${art.comments.length}</span>
+            </div>
+            <div class="art-info">
+                <h3 class="art-title">${escapeHTML(art.title)}</h3>
+                <p class="art-author">by ${escapeHTML(art.author)}</p>
+                ${previewHTML}
+            </div>
+        `;
+
+        card.addEventListener('click', () => openLightbox(art.id));
+        masonry.appendChild(card);
+    });
+}
+
+// ---------- 导航栏滚动效果 ----------
+function initNavbar() {
+    const navbar = document.getElementById('navbar');
+    const navLinks = document.querySelectorAll('.nav-link');
+
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.style.background = 'rgba(15, 23, 42, 0.95)';
-            navbar.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.3)';
+        if (window.scrollY > 20) {
+            navbar.classList.add('scrolled');
         } else {
-            navbar.style.background = 'rgba(15, 23, 42, 0.8)';
-            navbar.style.boxShadow = 'none';
+            navbar.classList.remove('scrolled');
         }
 
-        // 更新活动导航项
-        updateActiveNavItem();
-    });
-
-    // 移动端菜单切换
-    hamburger.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-        hamburger.classList.toggle('active');
-    });
-
-    // 点击导航项后关闭移动端菜单
-    navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            navLinks.classList.remove('active');
-            hamburger.classList.remove('active');
-        });
-    });
-}
-
-// 更新活动导航项
-function updateActiveNavItem() {
-    const sections = document.querySelectorAll('section[id]');
-    const navItems = document.querySelectorAll('.nav-links a');
-    
-    let current = '';
-    
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
-        
-        if (window.scrollY >= sectionTop - 200) {
-            current = section.getAttribute('id');
-        }
-    });
-
-    navItems.forEach(item => {
-        item.classList.remove('active');
-        if (item.getAttribute('href') === `#${current}`) {
-            item.classList.add('active');
-        }
-    });
-}
-
-// ========================================
-// 技能条动画
-// ========================================
-function initSkillBars() {
-    const skillCards = document.querySelectorAll('.skill-card');
-    
-    const observerOptions = {
-        threshold: 0.5,
-        rootMargin: '0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const progressBar = entry.target.querySelector('.progress-bar');
-                const progress = progressBar.getAttribute('data-progress');
-                
-                // 延迟动画以获得更好的视觉效果
-                setTimeout(() => {
-                    progressBar.style.width = `${progress}%`;
-                }, 200);
-                
-                observer.unobserve(entry.target);
+        // 更新活动链接
+        const sections = document.querySelectorAll('section[id], header[id]');
+        let current = '';
+        sections.forEach(section => {
+            if (window.scrollY >= section.offsetTop - 200) {
+                current = section.getAttribute('id');
             }
         });
-    }, observerOptions);
-
-    skillCards.forEach(card => {
-        observer.observe(card);
-    });
-}
-
-// ========================================
-// 滚动动画
-// ========================================
-function initScrollAnimations() {
-    // 为需要动画的元素添加 fade-in 类
-    const animatedElements = document.querySelectorAll(
-        '.section-header, .about-content, .skill-card, .project-card, .contact-content'
-    );
-    
-    animatedElements.forEach(el => {
-        el.classList.add('fade-in');
-    });
-
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                // 添加延迟以实现错开动画效果
-                const delay = Array.from(animatedElements).indexOf(entry.target) * 100;
-                
-                setTimeout(() => {
-                    entry.target.classList.add('visible');
-                }, delay);
-                
-                observer.unobserve(entry.target);
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${current}`) {
+                link.classList.add('active');
             }
         });
-    }, observerOptions);
-
-    animatedElements.forEach(el => {
-        observer.observe(el);
     });
 }
 
-// ========================================
-// 联系表单
-// ========================================
-function initContactForm() {
-    const form = document.getElementById('contactForm');
-    
-    form.addEventListener('submit', function(e) {
+// ---------- 灯箱 ----------
+let currentArtId = null;
+
+function initLightbox() {
+    const lightbox = document.getElementById('lightbox');
+    const closeBtn = document.getElementById('lightboxClose');
+    const form = document.getElementById('commentForm');
+
+    closeBtn.addEventListener('click', closeLightbox);
+
+    // 点击背景关闭
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) closeLightbox();
+    });
+
+    // ESC 关闭
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeLightbox();
+    });
+
+    // 提交评论
+    form.addEventListener('submit', (e) => {
         e.preventDefault();
-        
-        // 获取表单数据
-        const formData = {
-            name: document.getElementById('name').value,
-            email: document.getElementById('email').value,
-            subject: document.getElementById('subject').value,
-            message: document.getElementById('message').value
-        };
-        
-        // 简单验证
-        if (!formData.name || !formData.email || !formData.message) {
-            showNotification('请填写所有必填项', 'error');
-            return;
-        }
-        
-        // 邮箱格式验证
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.email)) {
-            showNotification('请输入有效的邮箱地址', 'error');
-            return;
-        }
-        
-        // 模拟提交成功
-        showNotification('消息已发送！我会尽快回复你。', 'success');
-        form.reset();
-        
-        // 实际项目中，这里应该发送数据到服务器
-        console.log('表单数据:', formData);
+        submitComment();
     });
 }
 
-// 显示通知
-function showNotification(message, type = 'success') {
-    // 移除已有的通知
-    const existingNotification = document.querySelector('.notification');
-    if (existingNotification) {
-        existingNotification.remove();
+function openLightbox(artId) {
+    const art = artworks.find(a => a.id === artId);
+    if (!art) return;
+
+    currentArtId = artId;
+
+    document.getElementById('lightboxImage').src = art.image;
+    document.getElementById('lightboxImage').alt = art.title;
+    document.getElementById('lightboxTitle').textContent = art.title;
+    document.getElementById('lightboxAuthor').textContent = `by ${art.author}`;
+
+    renderComments(art);
+
+    const lightbox = document.getElementById('lightbox');
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    // 滚动到顶部
+    lightbox.scrollTop = 0;
+}
+
+function closeLightbox() {
+    const lightbox = document.getElementById('lightbox');
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+    currentArtId = null;
+
+    // 重新渲染画廊以更新评论预览
+    renderGallery();
+    updateStats();
+}
+
+// ---------- 评论渲染 ----------
+function renderComments(art) {
+    const list = document.getElementById('commentsList');
+    const count = document.getElementById('commentsCount');
+
+    count.textContent = art.comments.length;
+
+    if (art.comments.length === 0) {
+        list.innerHTML = '<p class="no-comments">还没有留言，来写下第一条吧 ✨</p>';
+        return;
     }
-    
-    // 创建新通知
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <div class="notification-content">
-            <span class="notification-message">${message}</span>
+
+    list.innerHTML = art.comments.map(c => `
+        <div class="comment-item">
+            <div class="comment-avatar">${escapeHTML(c.name.charAt(0))}</div>
+            <div class="comment-body">
+                <span class="comment-name">${escapeHTML(c.name)}<span class="comment-time">${c.time}</span></span>
+                <p class="comment-text">${escapeHTML(c.text)}</p>
+            </div>
         </div>
-    `;
-    
-    // 添加样式
-    notification.style.cssText = `
-        position: fixed;
-        top: 100px;
-        left: 50%;
-        transform: translateX(-50%) translateY(-20px);
-        background: ${type === 'success' ? 'rgba(34, 197, 94, 0.9)' : 'rgba(239, 68, 68, 0.9)'};
-        color: white;
-        padding: 16px 32px;
-        border-radius: 12px;
-        font-weight: 500;
-        z-index: 10000;
-        opacity: 0;
-        transition: all 0.3s ease;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // 显示动画
-    requestAnimationFrame(() => {
-        notification.style.opacity = '1';
-        notification.style.transform = 'translateX(-50%) translateY(0)';
-    });
-    
-    // 自动隐藏
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateX(-50%) translateY(-20px)';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
+    `).join('');
 }
 
-// ========================================
-// 平滑滚动
-// ========================================
-function initSmoothScroll() {
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const targetId = this.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
-            
-            if (targetElement) {
-                const navHeight = document.querySelector('.navbar').offsetHeight;
-                const targetPosition = targetElement.offsetTop - navHeight;
-                
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
+// ---------- 提交评论 ----------
+function submitComment() {
+    const nameInput = document.getElementById('commentName');
+    const textInput = document.getElementById('commentText');
+    const name = nameInput.value.trim();
+    const text = textInput.value.trim();
+
+    if (!name || !text) return;
+
+    const art = artworks.find(a => a.id === currentArtId);
+    if (!art) return;
+
+    const now = new Date();
+    const timeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+    art.comments.push({ name, text, time: timeStr });
+    saveComments();
+
+    renderComments(art);
+
+    nameInput.value = '';
+    textInput.value = '';
 }
 
-// ========================================
-// 打字机效果（可选）
-// ========================================
-function typeWriter(element, text, speed = 100) {
-    let i = 0;
-    element.textContent = '';
-    
-    function type() {
-        if (i < text.length) {
-            element.textContent += text.charAt(i);
-            i++;
-            setTimeout(type, speed);
+// ---------- 统计数据 ----------
+function updateStats() {
+    const totalComments = artworks.reduce((sum, a) => sum + a.comments.length, 0);
+    const authors = new Set(artworks.map(a => a.author));
+
+    animateNumber('artCount', artworks.length);
+    animateNumber('commentCount', totalComments);
+    animateNumber('authorCount', authors.size);
+}
+
+function animateNumber(elementId, target) {
+    const el = document.getElementById(elementId);
+    const current = parseInt(el.textContent) || 0;
+    if (current === target) return;
+
+    const duration = 600;
+    const steps = 30;
+    const increment = (target - current) / steps;
+    let step = 0;
+
+    const timer = setInterval(() => {
+        step++;
+        if (step >= steps) {
+            el.textContent = target;
+            clearInterval(timer);
+        } else {
+            el.textContent = Math.round(current + increment * step);
         }
-    }
-    
-    type();
+    }, duration / steps);
 }
 
-// ========================================
-// 视差滚动效果
-// ========================================
-window.addEventListener('scroll', () => {
-    const scrolled = window.pageYOffset;
-    const parallaxElements = document.querySelectorAll('.shape');
-    
-    parallaxElements.forEach((el, index) => {
-        const speed = 0.5 + (index * 0.1);
-        el.style.transform = `translateY(${scrolled * speed}px)`;
-    });
-});
+// ---------- 回到顶部 ----------
+function initBackTop() {
+    const btn = document.getElementById('backTop');
 
-// ========================================
-// 鼠标跟随效果（Hero区域）
-// ========================================
-document.addEventListener('mousemove', (e) => {
-    const hero = document.querySelector('.hero');
-    if (!hero) return;
-    
-    const rect = hero.getBoundingClientRect();
-    
-    // 检查鼠标是否在hero区域内
-    if (e.clientY > rect.bottom || e.clientY < rect.top) return;
-    
-    const x = (e.clientX / window.innerWidth - 0.5) * 20;
-    const y = (e.clientY / window.innerHeight - 0.5) * 20;
-    
-    const shapes = document.querySelectorAll('.shape');
-    shapes.forEach((shape, index) => {
-        const factor = (index + 1) * 0.5;
-        shape.style.transform += ` translate(${x * factor}px, ${y * factor}px)`;
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 400) {
+            btn.classList.add('visible');
+        } else {
+            btn.classList.remove('visible');
+        }
     });
-});
 
-// ========================================
-// 项目卡片 3D 倾斜效果
-// ========================================
-document.querySelectorAll('.project-card').forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        
-        const rotateX = (y - centerY) / 20;
-        const rotateY = (centerX - x) / 20;
-        
-        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+    btn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
-    
-    card.addEventListener('mouseleave', () => {
-        card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0)';
-    });
-});
-
-// ========================================
-// 技能卡片悬停效果增强
-// ========================================
-document.querySelectorAll('.skill-card').forEach(card => {
-    card.addEventListener('mouseenter', () => {
-        const icon = card.querySelector('.skill-icon');
-        icon.style.transform = 'scale(1.1) rotate(5deg)';
-    });
-    
-    card.addEventListener('mouseleave', () => {
-        const icon = card.querySelector('.skill-icon');
-        icon.style.transform = 'scale(1) rotate(0)';
-    });
-});
-
-// ========================================
-// 页面加载动画
-// ========================================
-window.addEventListener('load', () => {
-    document.body.style.opacity = '0';
-    document.body.style.transition = 'opacity 0.5s ease';
-    
-    requestAnimationFrame(() => {
-        document.body.style.opacity = '1';
-    });
-});
-
-// ========================================
-// 键盘导航支持
-// ========================================
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Tab') {
-        document.body.classList.add('keyboard-navigation');
-    }
-});
-
-document.addEventListener('mousedown', () => {
-    document.body.classList.remove('keyboard-navigation');
-});
-
-// ========================================
-// 性能优化：防抖函数
-// ========================================
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
 }
 
-// 优化滚动事件
-const optimizedScroll = debounce(() => {
-    // 滚动相关的操作
-}, 16);
+// ---------- 工具函数 ----------
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
 
-window.addEventListener('scroll', optimizedScroll);
-
-// ========================================
-// 导出函数供外部使用
-// ========================================
-window.Portfolio = {
-    showNotification,
-    typeWriter
-};
+function pad(n) {
+    return n < 10 ? `0${n}` : n;
+}
