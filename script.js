@@ -42,6 +42,20 @@ const artworks = [
         title: '实验',
         author: '漂流本',
         comments: []
+    },
+    {
+        id: 6,
+        image: 'images/art-6.jpeg',
+        title: '实验',
+        author: '漂流本',
+        comments: []
+    },
+    {
+        id: 7,
+        image: 'images/art-7.jpeg',
+        title: '实验',
+        author: '漂流本',
+        comments: []
     }
 ];
 
