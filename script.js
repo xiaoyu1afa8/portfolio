@@ -1,67 +1,20 @@
 // ========================================
-// 漂流本画展 - JavaScript
+// 漂流本画展 - JavaScript (Disqus 评论版)
 // ========================================
 
-// ---------- 示例画作数据 ----------
-// 你可以替换成自己的画作信息
-// image: 图片地址（可以是相对路径如 images/01.jpg，也可以是网络链接）
-// title: 画作标题
-// author: 作者名字
+// ---------- 画作数据 ----------
 const artworks = [
-    {
-        id: 1,
-        image: 'images/art-1.png',
-        title: '实验',
-        author: '漂流本',
-        comments: []
-    },
-    {
-        id: 2,
-        image: 'images/art-2.jpeg',
-        title: '实验',
-        author: '漂流本',
-        comments: []
-    },
-    {
-        id: 3,
-        image: 'images/art-3.jpeg',
-        title: '实验',
-        author: '漂流本',
-        comments: []
-    },
-    {
-        id: 4,
-        image: 'images/art-4.jpeg',
-        title: '实验',
-        author: '漂流本',
-        comments: []
-    },
-    {
-        id: 5,
-        image: 'images/art-5.png',
-        title: '实验',
-        author: '漂流本',
-        comments: []
-    },
-    {
-        id: 6,
-        image: 'images/art-6.jpeg',
-        title: '实验',
-        author: '漂流本',
-        comments: []
-    },
-    {
-        id: 7,
-        image: 'images/art-7.jpeg',
-        title: '实验',
-        author: '漂流本',
-        comments: []
-    }
+    { id: 1, image: 'images/art-1.png', title: '实验', author: '漂流本' },
+    { id: 2, image: 'images/art-2.jpeg', title: '实验', author: '漂流本' },
+    { id: 3, image: 'images/art-3.jpeg', title: '实验', author: '漂流本' },
+    { id: 4, image: 'images/art-4.jpeg', title: '实验', author: '漂流本' },
+    { id: 5, image: 'images/art-5.png', title: '实验', author: '漂流本' },
+    { id: 6, image: 'images/art-6.jpeg', title: '实验', author: '漂流本' },
+    { id: 7, image: 'images/art-7.jpeg', title: '实验', author: '漂流本' }
 ];
 
 // ---------- 初始化 ----------
 document.addEventListener('DOMContentLoaded', () => {
-    loadComments();
     renderGallery();
     initNavbar();
     initLightbox();
@@ -69,30 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
     updateStats();
 });
 
-// ---------- 评论存储（localStorage）----------
-function loadComments() {
-    const saved = localStorage.getItem('artwork_comments');
-    if (saved) {
-        const parsed = JSON.parse(saved);
-        artworks.forEach(art => {
-            if (parsed[art.id]) {
-                art.comments = parsed[art.id];
-            }
-        });
-    }
-}
-
-function saveComments() {
-    const data = {};
-    artworks.forEach(art => {
-        data[art.id] = art.comments;
-    });
-    localStorage.setItem('artwork_comments', JSON.stringify(data));
-}
-
 // ---------- 渲染画廊 ----------
 function renderGallery() {
     const masonry = document.getElementById('masonry');
+    if (!masonry) return;
     masonry.innerHTML = '';
 
     artworks.forEach(art => {
@@ -100,26 +33,14 @@ function renderGallery() {
         card.className = 'art-card';
         card.setAttribute('data-id', art.id);
 
-        // 最新一条评论预览
-        let previewHTML = '';
-        if (art.comments.length > 0) {
-            const latest = art.comments[art.comments.length - 1];
-            previewHTML = `
-                <div class="art-preview-comments">
-                    <p class="art-preview-comment"><strong>${escapeHTML(latest.name)}</strong>：${escapeHTML(latest.text)}</p>
-                </div>
-            `;
-        }
-
         card.innerHTML = `
             <div class="art-image-wrap">
                 <img class="art-image" src="${art.image}" alt="${escapeHTML(art.title)}" loading="lazy">
-                <span class="art-comment-badge">💬 ${art.comments.length}</span>
+                <span class="art-comment-badge">💬 留言</span>
             </div>
             <div class="art-info">
                 <h3 class="art-title">${escapeHTML(art.title)}</h3>
                 <p class="art-author">by ${escapeHTML(art.author)}</p>
-                ${previewHTML}
             </div>
         `;
 
@@ -140,7 +61,6 @@ function initNavbar() {
             navbar.classList.remove('scrolled');
         }
 
-        // 更新活动链接
         const sections = document.querySelectorAll('section[id], header[id]');
         let current = '';
         sections.forEach(section => {
@@ -163,24 +83,15 @@ let currentArtId = null;
 function initLightbox() {
     const lightbox = document.getElementById('lightbox');
     const closeBtn = document.getElementById('lightboxClose');
-    const form = document.getElementById('commentForm');
 
     closeBtn.addEventListener('click', closeLightbox);
 
-    // 点击背景关闭
     lightbox.addEventListener('click', (e) => {
         if (e.target === lightbox) closeLightbox();
     });
 
-    // ESC 关闭
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeLightbox();
-    });
-
-    // 提交评论
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        submitComment();
     });
 }
 
@@ -195,13 +106,12 @@ function openLightbox(artId) {
     document.getElementById('lightboxTitle').textContent = art.title;
     document.getElementById('lightboxAuthor').textContent = `by ${art.author}`;
 
-    renderComments(art);
+    // 加载该画作的 Disqus 评论
+    loadDisqusComments(artId);
 
     const lightbox = document.getElementById('lightbox');
     lightbox.classList.add('open');
     document.body.style.overflow = 'hidden';
-
-    // 滚动到顶部
     lightbox.scrollTop = 0;
 }
 
@@ -210,66 +120,32 @@ function closeLightbox() {
     lightbox.classList.remove('open');
     document.body.style.overflow = '';
     currentArtId = null;
-
-    // 重新渲染画廊以更新评论预览
-    renderGallery();
-    updateStats();
 }
 
-// ---------- 评论渲染 ----------
-function renderComments(art) {
-    const list = document.getElementById('commentsList');
-    const count = document.getElementById('commentsCount');
+// ---------- Disqus 评论加载 ----------
+function loadDisqusComments(artId) {
+    // 设置当前画作的唯一标识
+    window.DISQUS_IDENTIFIER = 'art-' + artId;
 
-    count.textContent = art.comments.length;
-
-    if (art.comments.length === 0) {
-        list.innerHTML = '<p class="no-comments">还没有留言，来写下第一条吧 ✨</p>';
-        return;
+    // 重置 Disqus 并加载新评论
+    if (typeof DISQUS !== 'undefined') {
+        DISQUS.reset({
+            reload: true,
+            config: function () {
+                this.page.identifier = 'art-' + artId;
+                this.page.url = window.location.href.split('#')[0] + '#art-' + artId;
+                this.page.title = artworks.find(a => a.id === artId)?.title || '画作';
+            }
+        });
     }
-
-    list.innerHTML = art.comments.map(c => `
-        <div class="comment-item">
-            <div class="comment-avatar">${escapeHTML(c.name.charAt(0))}</div>
-            <div class="comment-body">
-                <span class="comment-name">${escapeHTML(c.name)}<span class="comment-time">${c.time}</span></span>
-                <p class="comment-text">${escapeHTML(c.text)}</p>
-            </div>
-        </div>
-    `).join('');
-}
-
-// ---------- 提交评论 ----------
-function submitComment() {
-    const nameInput = document.getElementById('commentName');
-    const textInput = document.getElementById('commentText');
-    const name = nameInput.value.trim();
-    const text = textInput.value.trim();
-
-    if (!name || !text) return;
-
-    const art = artworks.find(a => a.id === currentArtId);
-    if (!art) return;
-
-    const now = new Date();
-    const timeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-
-    art.comments.push({ name, text, time: timeStr });
-    saveComments();
-
-    renderComments(art);
-
-    nameInput.value = '';
-    textInput.value = '';
+    // 如果 DISQUS 还没加载完，embed.js 会自动使用 DISQUS_IDENTIFIER
 }
 
 // ---------- 统计数据 ----------
 function updateStats() {
-    const totalComments = artworks.reduce((sum, a) => sum + a.comments.length, 0);
-    const authors = new Set(artworks.map(a => a.author));
-
     animateNumber('artCount', artworks.length);
-    animateNumber('commentCount', totalComments);
+    animateNumber('commentCount', 0); // Disqus 评论数无法在前端获取
+    const authors = new Set(artworks.map(a => a.author));
     animateNumber('authorCount', authors.size);
 }
 
@@ -316,8 +192,4 @@ function escapeHTML(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
-}
-
-function pad(n) {
-    return n < 10 ? `0${n}` : n;
 }
