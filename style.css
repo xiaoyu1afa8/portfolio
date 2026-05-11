@@ -409,6 +409,95 @@ img {
 }
 
 /* ========================================
+   站长留言
+   ======================================== */
+.admin-message {
+    padding: 80px 0;
+    background: var(--white);
+}
+
+.admin-card {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    background: var(--bg-warm);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    max-width: 700px;
+    margin: 0 auto;
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--text);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.admin-content {
+    flex: 1;
+}
+
+.admin-content .section-title {
+    margin-bottom: 16px;
+}
+
+.admin-content p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin-bottom: 8px;
+}
+
+.admin-contact {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.admin-contact p {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 6px;
+}
+
+.admin-contact a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.admin-contact a:hover {
+    color: var(--text);
+    text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+    .admin-message {
+        padding: 60px 0;
+    }
+
+    .admin-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 28px 20px;
+    }
+
+    .admin-content p {
+        text-align: center;
+    }
+}
+
+/* ========================================
    页脚
    ======================================== */
 .footer {
@@ -740,7 +829,7 @@ img {
     }
 
     .about-stats {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 12px;
     }
 

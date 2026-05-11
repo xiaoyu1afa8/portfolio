@@ -13,9 +13,7 @@ const artworks = [
     { id: 2, image: 'images/art-2.jpeg', title: '实验', author: '漂流本' },
     { id: 3, image: 'images/art-3.jpeg', title: '实验', author: '漂流本' },
     { id: 4, image: 'images/art-4.jpeg', title: '实验', author: '漂流本' },
-    { id: 5, image: 'images/art-5.png', title: '实验', author: '漂流本' },
-    { id: 6, image: 'images/art-6.jpeg', title: '实验', author: '漂流本' },
-    { id: 7, image: 'images/art-7.jpeg', title: '实验', author: '漂流本' }
+    { id: 5, image: 'images/art-5.png', title: '实验', author: '漂流本' }
 ];
 
 // ---------- 初始化 ----------
@@ -192,7 +190,6 @@ function loadDisqusComments(artId) {
 // ---------- 统计数据 ----------
 function updateStats() {
     animateNumber('artCount', artworks.length);
-    animateNumber('commentCount', 0);
     const authors = new Set(artworks.map(a => a.author));
     animateNumber('authorCount', authors.size);
 }
