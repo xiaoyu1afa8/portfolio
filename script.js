@@ -2,6 +2,11 @@
 // 漂流本画展 - JavaScript (Disqus 评论版)
 // ========================================
 
+// ---------- Disqus 配置 ----------
+const DISQUS_SHORTNAME = 'xyplb-1';
+const DISQUS_API_KEY = 'E8zGUSm5GXl19Cv7YTEZec6xGR362vq3dfMcnASWIg2D2z7fwSRqZxQFmVoch5ka';
+const SITE_BASE_URL = 'https://xiaoyu1afa8.github.io/portfolio/';
+
 // ---------- 画作数据 ----------
 const artworks = [
     { id: 1, image: 'images/art-1.png', title: '实验', author: '漂流本' },
@@ -20,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initLightbox();
     initBackTop();
     updateStats();
+    loadDisqusCommentCounts();
 });
 
 // ---------- 渲染画廊 ----------
@@ -36,7 +42,7 @@ function renderGallery() {
         card.innerHTML = `
             <div class="art-image-wrap">
                 <img class="art-image" src="${art.image}" alt="${escapeHTML(art.title)}" loading="lazy">
-                <span class="art-comment-badge">💬 留言</span>
+                <span class="art-comment-badge" data-art-id="${art.id}">💬 0</span>
             </div>
             <div class="art-info">
                 <h3 class="art-title">${escapeHTML(art.title)}</h3>
@@ -47,6 +53,48 @@ function renderGallery() {
         card.addEventListener('click', () => openLightbox(art.id));
         masonry.appendChild(card);
     });
+}
+
+// ---------- Disqus 评论数加载 ----------
+function loadDisqusCommentCounts() {
+    // 构建每张画作的 identifier 数组
+    const threadIdentifiers = artworks.map(art => 'ident:' + art.id + '-' + art.title);
+
+    // 使用 JSONP 调用 Disqus API
+    const script = document.createElement('script');
+    script.src = `https://disqus.com/api/3.0/threads/set.jsonp?` +
+        `api_key=${encodeURIComponent(DISQUS_API_KEY)}` +
+        `&forum=${DISQUS_SHORTNAME}` +
+        `&thread=${threadIdentifiers.map(t => encodeURIComponent(t)).join('&thread=')}` +
+        `&callback=onDisqusCountsLoaded`;
+    document.head.appendChild(script);
+}
+
+// Disqus API 回调函数
+function onDisqusCountsLoaded(response) {
+    if (!response || !response.response) return;
+
+    let totalCount = 0;
+
+    // response.response 是一个数组，每个元素包含 identifier 和 posts
+    response.response.forEach(thread => {
+        const count = thread.posts || 0;
+        totalCount += count;
+
+        // 从 identifier 中解析 art_id（格式：art-1-实验）
+        const identifier = thread.identifier || thread.id;
+        const match = identifier.match(/art-(\d+)/);
+        if (match) {
+            const artId = match[1];
+            const badge = document.querySelector(`.art-comment-badge[data-art-id="${artId}"]`);
+            if (badge) {
+                badge.textContent = `💬 ${count}`;
+            }
+        }
+    });
+
+    // 更新统计区的总评论数
+    animateNumber('commentCount', totalCount);
 }
 
 // ---------- 导航栏滚动效果 ----------
@@ -120,31 +168,31 @@ function closeLightbox() {
     lightbox.classList.remove('open');
     document.body.style.overflow = '';
     currentArtId = null;
+
+    // 关闭灯箱后刷新评论数
+    loadDisqusCommentCounts();
 }
 
 // ---------- Disqus 评论加载 ----------
 function loadDisqusComments(artId) {
-    // 设置当前画作的唯一标识
     window.DISQUS_IDENTIFIER = 'art-' + artId;
 
-    // 重置 Disqus 并加载新评论
     if (typeof DISQUS !== 'undefined') {
         DISQUS.reset({
             reload: true,
             config: function () {
                 this.page.identifier = 'art-' + artId;
-                this.page.url = window.location.href.split('#')[0] + '#art-' + artId;
+                this.page.url = SITE_BASE_URL + '#art-' + artId;
                 this.page.title = artworks.find(a => a.id === artId)?.title || '画作';
             }
         });
     }
-    // 如果 DISQUS 还没加载完，embed.js 会自动使用 DISQUS_IDENTIFIER
 }
 
 // ---------- 统计数据 ----------
 function updateStats() {
     animateNumber('artCount', artworks.length);
-    animateNumber('commentCount', 0); // Disqus 评论数无法在前端获取
+    animateNumber('commentCount', 0);
     const authors = new Set(artworks.map(a => a.author));
     animateNumber('authorCount', authors.size);
 }
