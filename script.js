@@ -9,10 +9,10 @@ const SITE_BASE_URL = 'https://xiaoyu1afa8.github.io/portfolio/';
 
 // ---------- 画作数据 ----------
 const artworks = [
-    { id: 1, image: 'images/art-1.jpg', title: '实验', author: '漂流本' },
-    { id: 2, image: 'images/art-2.jpg', title: '实验', author: '漂流本' },
-    { id: 3, image: 'images/art-3.jpg', title: '实验', author: '漂流本' },
-    { id: 4, image: 'images/art-4.gif', title: '实验', author: '漂流本' }
+    { id: 1, image: 'images/art-4.gif', title: '实验', author: '漂流本' },
+    { id: 2, image: 'images/art-1.jpg', title: '实验', author: '漂流本' },
+    { id: 3, image: 'images/art-2.jpg', title: '实验', author: '漂流本' },
+    { id: 4, image: 'images/art-3.jpg', title: '实验', author: '漂流本' }
 ];
 
 // ---------- 初始化 ----------
