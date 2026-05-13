@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漂流本画展</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo">漂流本画展</a>
+            <div class="nav-links">
+                <a href="#gallery" class="nav-link active">画廊</a>
+                <a href="#about" class="nav-link">关于</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero 区域 -->
+    <header class="hero" id="hero">
+        <div class="hero-inner">
+            <p class="hero-subtitle">—— 学校漂流本 ——</p>
+            <h1 class="hero-title">每一笔，都是一段故事</h1>
+            <p class="hero-desc">这里收集了漂流本中大家留下的画作，每一幅都承载着独特的情感与回忆。</p>
+            <a href="#gallery" class="hero-btn">浏览画作</a>
+        </div>
+    </header>
+
+    <!-- 画廊 -->
+    <section class="gallery" id="gallery">
+        <div class="section-inner">
+            <div class="section-header">
+                <h2 class="section-title">画作画廊</h2>
+                <p class="section-desc">点击画作查看大图，在下方留下你的感想</p>
+            </div>
+            <div class="masonry" id="masonry">
+                <!-- 画作卡片由 JS 动态生成 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于 -->
+    <section class="about" id="about">
+        <div class="section-inner">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2 class="section-title">关于漂流本</h2>
+                    <p>漂流本是一个在同学之间传递的笔记本，每个人都可以在上面留下自己的画作、文字和心情。它承载着我们共同的青春记忆。</p>
+                    <p>这个网站将这些珍贵的画作数字化保存，让更多人能看到这些充满创意和温暖的作品。</p>
+                </div>
+                <div class="about-stats">
+                    <div class="stat">
+                        <span class="stat-num" id="artCount">0</span>
+                        <span class="stat-label">幅画作</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-num" id="commentCount">0</span>
+                        <span class="stat-label">条留言</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-num" id="authorCount">0</span>
+                        <span class="stat-label">位作者</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <p>漂流本画展 &copy; 2024 &mdash; 用心记录每一笔</p>
+        </div>
+    </footer>
+
+    <!-- 图片灯箱 -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose">&times;</button>
+        <div class="lightbox-body">
+            <div class="lightbox-image-wrap">
+                <img class="lightbox-image" id="lightboxImage" src="" alt="">
+            </div>
+            <div class="lightbox-info">
+                <h3 class="lightbox-title" id="lightboxTitle"></h3>
+                <p class="lightbox-author" id="lightboxAuthor"></p>
+            </div>
+            <!-- 评论区（Disqus） -->
+            <div class="comments-section">
+                <h4 class="comments-title">留言讨论</h4>
+                <div id="disqus_thread"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 回到顶部 -->
+    <button class="back-top" id="backTop" title="回到顶部">↑</button>
+
+    <script src="script.js"></script>
+    <script>
+        var disqus_config = function () {
+            this.page.identifier = window.DISQUS_IDENTIFIER || 'default';
+            this.page.url = window.location.href.split('#')[0] + '#art-' + (window.DISQUS_IDENTIFIER || 'default');
+        };
+        (function() {
+            var d = document, s = d.createElement('script');
+            s.src = 'https://xyplb-1.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+</body>
+</html>
